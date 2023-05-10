@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "s3bucket" {
-  bucket="paras"
+  bucket="harshbuck123"
   tags={
-    name="parasec2"
-    owner="paras.kamboj@cloudeq.com"
+    name="harshmittal"
+    owner="harsh.mittal@cloudeq.com"
   }
 }
