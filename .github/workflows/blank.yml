@@ -2,16 +2,20 @@ name: ec2instance_create
 on:
   workflow_dispatch:
        inputs :
-          ec2-region:
+          condition:
             type: boolean
             description: "condition"
             default: false
+          ec2-region:
+              description: "ec2-region"
+              required: true
  
     
 env:
-  bucket: teststorage1983
+  bucket: paraskambojbuc
   tfstate_file: ec2.tfstate
   # condition: {{github.event.inputs.condition}}
+  aws-region: ${{github.event.inputs.ec2-region}}
 
 jobs:
   terraform_plan:
@@ -22,7 +26,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-        if: ${{ inputs.ec2-region == 'true'}}
+        if: ${{ inputs.condition == 'true'}}
       - name: Setup terraform hashicorp
         uses: hashicorp/setup-terraform@v2 
         with:
@@ -36,12 +40,13 @@ jobs:
           aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
           aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
           aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
+          Aws-region: ${{env.aws-region}}
 
       
       - name: terraform init  
         run: |
           cd ec2
-          terraform init 
+          terraform init -reconfigure -backend-config="bucket=${{env.bucket}}" -backend-config="key=${{env.tfstate_file}}"
       
       - name: terraform plan
         run: |
