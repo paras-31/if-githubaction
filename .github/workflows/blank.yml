@@ -1,36 +1,54 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# Controls when the workflow will run
+name: ec2instance_create
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+       inputs :
+          ec2-region:
+            type: boolean
+            description: "condition"
+            default: false
+ 
+    
+env:
+  bucket: teststorage1983
+  tfstate_file: ec2.tfstate
+  # condition: {{github.event.inputs.condition}}
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  terraform_plan:
+    name: terraform
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
+        if: ${{ inputs.ec2-region == 'true'}}
+      - name: Setup terraform hashicorp
+        uses: hashicorp/setup-terraform@v2 
+        with:
+          terraform_version: 1.3.4
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+        
+      
+      - name: AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1   
+        with:
+          aws-access-key-id: ${{secrets.AWS_ACCESS_KEY_ID}}
+          aws-secret-access-key: ${{secrets.AWS_SECRET_ACCESS_KEY}}
+          aws-session-token: ${{secrets.AWS_SESSION_TOKEN}}
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      
+      - name: terraform init  
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          cd ec2
+          terraform init 
+      
+      - name: terraform plan
+        run: |
+          cd ec2
+          terraform plan 
+      - name: terraform apply  
+      
+        run: |
+          cd ec2
+          terraform apply -auto-approve
