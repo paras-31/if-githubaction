@@ -45,15 +45,15 @@ jobs:
       
       - name: terraform init  
         run: |
-          cd ec2
+          cd s3-backend
           terraform init -reconfigure -backend-config="bucket=${{env.bucket}}" -backend-config="key=${{env.tfstate_file}}"
       
       - name: terraform plan
         run: |
-          cd ec2
+          cd s3-backend
           terraform plan 
       - name: terraform apply  
       
         run: |
-          cd ec2
+          cd s3-backend
           terraform apply -auto-approve
