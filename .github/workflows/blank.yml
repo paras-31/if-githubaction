@@ -3,9 +3,8 @@ on:
   workflow_dispatch:
        inputs :
           condition:
-            type: boolean
             description: "condition"
-            default: false
+            required: true
           ec2-region:
               description: "ec2-region"
               required: true
